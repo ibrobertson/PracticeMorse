@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Morse Code Reference</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dot, .dash {
+            display: inline-block;
+            border-radius: 50%;
+            background: #ffd700;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+        }
+
+        .dash {
+            width: 30px;
+            height: 12px;
+            border-radius: 6px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .morse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .morse-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .morse-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ffd700;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .character {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #ffd700;
+        }
+
+        .morse-code {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            min-height: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .morse-code .dot {
+            width: 6px;
+            height: 6px;
+        }
+
+        .morse-code .dash {
+            width: 16px;
+            height: 6px;
+            border-radius: 3px;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .play-button:hover {
+            background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(238, 90, 36, 0.4);
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .speed-control {
+            margin: 0 10px;
+        }
+
+        .speed-control label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .speed-control input {
+            width: 200px;
+        }
+
+        @media (max-width: 768px) {
+            .morse-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .legend {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 Morse Code Reference</h1>
+        <p class="subtitle">Interactive alphabet and numbers with audio playback</p>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <span class="dot"></span>
+                <span>Dot (Dit)</span>
+            </div>
+            <div class="legend-item">
+                <span class="dash"></span>
+                <span>Dash (Dah)</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="speed-control">
+                <label for="wpm">Speed:</label>
+                <input type="range" id="wpm" min="5" max="30" value="15" step="1">
+                <span id="wpm-value">15</span> WPM
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🔤 Alphabet</h2>
+            <div class="morse-grid" id="alphabet-grid"></div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🔢 Numbers</h2>
+            <div class="morse-grid" id="numbers-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Morse code mappings
+        const morseCode = {
+            'A': '.-',    'B': '-...',  'C': '-.-.',  'D': '-..',   'E': '.',
+            'F': '..-.',  'G': '--.',   'H': '....',  'I': '..',    'J': '.---',
+            'K': '-.-',   'L': '.-..',  'M': '--',    'N': '-.',    'O': '---',
+            'P': '.--.',  'Q': '--.-',  'R': '.-.',   'S': '...',   'T': '-',
+            'U': '..-',   'V': '...-',  'W': '.--',   'X': '-..-',  'Y': '-.--',
+            'Z': '--..',  '0': '-----', '1': '.----', '2': '..---', '3': '...--',
+            '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+            '9': '----.'
+        };
+
+        let synth;
+        let currentWPM = 15;
+
+        // Initialize Tone.js
+        async function initAudio() {
+            if (!synth) {
+                await Tone.start();
+                synth = new Tone.Oscillator(600, "sine").toDestination();
+            }
+        }
+
+        // Calculate timing based on WPM
+        function getTimings() {
+            const dotDuration = 1.2 / currentWPM; // Standard formula
+            return {
+                dot: dotDuration,
+                dash: dotDuration * 3,
+                elementGap: dotDuration,
+                letterGap: dotDuration * 3
+            };
+        }
+
+        // Play morse code sequence
+        async function playMorse(sequence) {
+            await initAudio();
+            
+            const timings = getTimings();
+            let currentTime = Tone.now();
+
+            for (let i = 0; i < sequence.length; i++) {
+                const element = sequence[i];
+                const duration = element === '.' ? timings.dot : timings.dash;
+                
+                synth.start(currentTime);
+                synth.stop(currentTime + duration);
+                
+                currentTime += duration + timings.elementGap;
+            }
+        }
+
+        // Create visual morse code representation
+        function createMorseVisual(code) {
+            const visual = document.createElement('div');
+            visual.className = 'morse-code';
+            
+            for (let char of code) {
+                const element = document.createElement('span');
+                element.className = char === '.' ? 'dot' : 'dash';
+                visual.appendChild(element);
+            }
+            
+            return visual;
+        }
+
+        // Create morse code item
+        function createMorseItem(character, code) {
+            const item = document.createElement('div');
+            item.className = 'morse-item';
+            
+            const charDiv = document.createElement('div');
+            charDiv.className = 'character';
+            charDiv.textContent = character;
+            
+            const codeVisual = createMorseVisual(code);
+            
+            const button = document.createElement('button');
+            button.className = 'play-button';
+            button.textContent = '🔊 Play';
+            button.onclick = async () => {
+                button.disabled = true;
+                button.textContent = 'Playing...';
+                await playMorse(code);
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.textContent = '🔊 Play';
+                }, getTimings().letterGap * 1000);
+            };
+            
+            item.appendChild(charDiv);
+            item.appendChild(codeVisual);
+            item.appendChild(button);
+            
+            return item;
+        }
+
+        // Initialize the page
+        function init() {
+            const alphabetGrid = document.getElementById('alphabet-grid');
+            const numbersGrid = document.getElementById('numbers-grid');
+            const wpmSlider = document.getElementById('wpm');
+            const wpmValue = document.getElementById('wpm-value');
+
+            // Create alphabet items
+            for (let i = 65; i <= 90; i++) {
+                const char = String.fromCharCode(i);
+                const code = morseCode[char];
+                alphabetGrid.appendChild(createMorseItem(char, code));
+            }
+
+            // Create number items
+            for (let i = 0; i <= 9; i++) {
+                const char = i.toString();
+                const code = morseCode[char];
+                numbersGrid.appendChild(createMorseItem(char, code));
+            }
+
+            // WPM slider handler
+            wpmSlider.addEventListener('input', (e) => {
+                currentWPM = parseInt(e.target.value);
+                wpmValue.textContent = currentWPM;
+            });
+        }
+
+        // Start when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
