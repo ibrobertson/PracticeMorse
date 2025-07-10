@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Morse Code Reference</title>
+    <title>Interactive Morse Code Trainer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         * {
@@ -39,6 +39,52 @@
             opacity: 0.9;
         }
 
+        /* Tab Styles */
+        .tab-container {
+            margin-bottom: 30px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ffd700;
+        }
+
+        .tab-button.active {
+            background: #ffd700;
+            color: #1e3c72;
+            border-color: #ffd700;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Reference Tab Styles */
         .legend {
             display: flex;
             justify-content: center;
@@ -182,6 +228,153 @@
             width: 200px;
         }
 
+        /* Koch Method Styles */
+        .koch-container {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .lesson-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .lesson-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .lesson-button {
+            background: #ffd700;
+            color: #1e3c72;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .lesson-button:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .lesson-info {
+            font-size: 1.5rem;
+            margin: 0 20px;
+        }
+
+        .lesson-letters {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+
+        .koch-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .koch-button {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .koch-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .koch-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .practice-area {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            min-height: 2rem;
+        }
+
+        .feedback {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            min-height: 1.5rem;
+        }
+
+        .feedback.correct {
+            color: #28a745;
+        }
+
+        .feedback.incorrect {
+            color: #dc3545;
+        }
+
+        .score {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .waiting-indicator {
+            color: #ffd700;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         @media (max-width: 768px) {
             .morse-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -195,41 +388,109 @@
                 flex-direction: column;
                 gap: 15px;
             }
+
+            .lesson-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .koch-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .score {
+                flex-direction: column;
+                gap: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📡 Morse Code Reference</h1>
-        <p class="subtitle">Interactive alphabet and numbers with audio playback</p>
+        <h1>📡 Morse Code Trainer</h1>
+        <p class="subtitle">Learn morse code with interactive reference and Koch method training</p>
         
-        <div class="legend">
-            <div class="legend-item">
-                <span class="dot"></span>
-                <span>Dot (Dit)</span>
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('reference')">📚 Reference</button>
+                <button class="tab-button" onclick="switchTab('koch')">🎯 Koch Method</button>
             </div>
-            <div class="legend-item">
-                <span class="dash"></span>
-                <span>Dash (Dah)</span>
+
+            <!-- Reference Tab -->
+            <div id="reference-tab" class="tab-content active">
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="dot"></span>
+                        <span>Dot (Dit)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="dash"></span>
+                        <span>Dash (Dah)</span>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="speed-control">
+                        <label for="wpm">Speed:</label>
+                        <input type="range" id="wpm" min="5" max="30" value="15" step="1">
+                        <span id="wpm-value">15</span> WPM
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">🔤 Alphabet</h2>
+                    <div class="morse-grid" id="alphabet-grid"></div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">🔢 Numbers</h2>
+                    <div class="morse-grid" id="numbers-grid"></div>
+                </div>
             </div>
-        </div>
 
-        <div class="controls">
-            <div class="speed-control">
-                <label for="wpm">Speed:</label>
-                <input type="range" id="wpm" min="5" max="30" value="15" step="1">
-                <span id="wpm-value">15</span> WPM
+            <!-- Koch Method Tab -->
+            <div id="koch-tab" class="tab-content">
+                <div class="koch-container">
+                    <div class="lesson-selector">
+                        <h2 class="section-title">📖 Lesson Selection</h2>
+                        <div class="lesson-controls">
+                            <button class="lesson-button" id="lesson-down" onclick="changeLesson(-1)">−</button>
+                            <div class="lesson-info">
+                                <div>Lesson <span id="current-lesson">1</span></div>
+                            </div>
+                            <button class="lesson-button" id="lesson-up" onclick="changeLesson(1)">+</button>
+                        </div>
+                        <div class="lesson-letters" id="lesson-letters">Letters: K, M</div>
+                        <div class="koch-controls">
+                            <button class="koch-button" id="start-button" onclick="startPractice()">🚀 Start Practice</button>
+                            <button class="koch-button" id="stop-button" onclick="stopPractice()" style="display: none;">⏹️ Stop</button>
+                        </div>
+                    </div>
+
+                    <div class="practice-area">
+                        <div class="status-display" id="status">Select a lesson and press Start to begin!</div>
+                        <div class="feedback" id="feedback"></div>
+                        <div class="score">
+                            <div class="score-item">
+                                <div class="score-value" id="correct-count">0</div>
+                                <div>Correct</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-value" id="total-count">0</div>
+                                <div>Total</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-value" id="accuracy">0%</div>
+                                <div>Accuracy</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; font-size: 1rem; opacity: 0.8;">
+                            Listen to the morse code and press the corresponding letter on your keyboard
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="section">
-            <h2 class="section-title">🔤 Alphabet</h2>
-            <div class="morse-grid" id="alphabet-grid"></div>
-        </div>
-
-        <div class="section">
-            <h2 class="section-title">🔢 Numbers</h2>
-            <div class="morse-grid" id="numbers-grid"></div>
         </div>
     </div>
 
@@ -246,8 +507,60 @@
             '9': '----.'
         };
 
+        // Koch method lesson progression
+        const kochLessons = [
+            ['K', 'M'],
+            ['K', 'M', 'R'],
+            ['K', 'M', 'R', 'S'],
+            ['K', 'M', 'R', 'S', 'U'],
+            ['K', 'M', 'R', 'S', 'U', 'A'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ','],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V', 'G'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V', 'G', '5'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V', 'G', '5', '/'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V', 'G', '5', '/', 'Q'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V', 'G', '5', '/', 'Q', '9'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V', 'G', '5', '/', 'Q', '9', 'Z'],
+            ['K', 'M', 'R', 'S', 'U', 'A', 'P', 'T', 'L', 'O', 'W', 'I', '.', 'N', 'J', 'E', 'F', '0', 'Y', ',', 'V', 'G', '5', '/', 'Q', '9', 'Z', 'H']
+        ];
+
         let synth;
         let currentWPM = 15;
+        let currentLesson = 1;
+        let isPlaying = false;
+        let currentCharacter = '';
+        let correctCount = 0;
+        let totalCount = 0;
+        let practiceActive = false;
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
 
         // Initialize Tone.js
         async function initAudio() {
@@ -259,7 +572,7 @@
 
         // Calculate timing based on WPM
         function getTimings() {
-            const dotDuration = 1.2 / currentWPM; // Standard formula
+            const dotDuration = 1.2 / currentWPM;
             return {
                 dot: dotDuration,
                 dash: dotDuration * 3,
@@ -284,6 +597,8 @@
                 
                 currentTime += duration + timings.elementGap;
             }
+
+            return currentTime + timings.letterGap - Tone.now();
         }
 
         // Create visual morse code representation
@@ -331,6 +646,97 @@
             return item;
         }
 
+        // Koch Method Functions
+        function changeLesson(direction) {
+            const newLesson = currentLesson + direction;
+            if (newLesson >= 1 && newLesson <= kochLessons.length) {
+                currentLesson = newLesson;
+                updateLessonDisplay();
+            }
+        }
+
+        function updateLessonDisplay() {
+            document.getElementById('current-lesson').textContent = currentLesson;
+            document.getElementById('lesson-letters').textContent = 'Letters: ' + kochLessons[currentLesson - 1].join(', ');
+            
+            // Update button states
+            document.getElementById('lesson-down').disabled = currentLesson === 1;
+            document.getElementById('lesson-up').disabled = currentLesson === kochLessons.length;
+        }
+
+        function startPractice() {
+            practiceActive = true;
+            correctCount = 0;
+            totalCount = 0;
+            updateScore();
+            
+            document.getElementById('start-button').style.display = 'none';
+            document.getElementById('stop-button').style.display = 'inline-block';
+            document.getElementById('feedback').textContent = '';
+            
+            nextCharacter();
+        }
+
+        function stopPractice() {
+            practiceActive = false;
+            isPlaying = false;
+            
+            document.getElementById('start-button').style.display = 'inline-block';
+            document.getElementById('stop-button').style.display = 'none';
+            document.getElementById('status').textContent = 'Practice stopped. Press Start to begin again!';
+            document.getElementById('feedback').textContent = '';
+        }
+
+        async function nextCharacter() {
+            if (!practiceActive) return;
+            
+            isPlaying = true;
+            const lessonLetters = kochLessons[currentLesson - 1];
+            currentCharacter = lessonLetters[Math.floor(Math.random() * lessonLetters.length)];
+            
+            document.getElementById('status').innerHTML = '<span class="waiting-indicator">🎵 Listen...</span>';
+            document.getElementById('feedback').textContent = '';
+            
+            const code = morseCode[currentCharacter];
+            const duration = await playMorse(code);
+            
+            setTimeout(() => {
+                if (practiceActive) {
+                    document.getElementById('status').textContent = 'Press the letter you heard on your keyboard';
+                    isPlaying = false;
+                }
+            }, duration * 1000);
+        }
+
+        function handleKeyPress(event) {
+            if (!practiceActive || isPlaying) return;
+            
+            const pressedKey = event.key.toUpperCase();
+            totalCount++;
+            
+            if (pressedKey === currentCharacter) {
+                correctCount++;
+                document.getElementById('feedback').innerHTML = '<span class="correct">✅ Correct! (' + currentCharacter + ')</span>';
+            } else {
+                document.getElementById('feedback').innerHTML = '<span class="incorrect">❌ Incorrect. Correct answer was: ' + currentCharacter + '</span>';
+            }
+            
+            updateScore();
+            
+            setTimeout(() => {
+                if (practiceActive) {
+                    nextCharacter();
+                }
+            }, 1500);
+        }
+
+        function updateScore() {
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('total-count').textContent = totalCount;
+            const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
         // Initialize the page
         function init() {
             const alphabetGrid = document.getElementById('alphabet-grid');
@@ -357,6 +763,12 @@
                 currentWPM = parseInt(e.target.value);
                 wpmValue.textContent = currentWPM;
             });
+
+            // Initialize Koch method
+            updateLessonDisplay();
+
+            // Add keyboard event listener
+            document.addEventListener('keydown', handleKeyPress);
         }
 
         // Start when page loads
